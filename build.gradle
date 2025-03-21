@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '9.0.0-beta10'
+}
+
+group = project.group
+version = project.version
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.slf4j:slf4j-simple:${project.slf4j_version}"
+    compileOnly files("libs/mcversionrenamer-${project.mcvr_version}.jar")
+}
+
+jar {
+    archiveBaseName.set("MCVRPluginTemplate")
+    archiveVersion.set("")
+
+    manifest {
+        attributes(
+                "Plugin-Main": "com.kyfstore.mcvrplugintemplate.PluginTemplateInitializer"
+        )
+    }
+}
+
+shadowJar {
+    archiveBaseName.set("MCVRPluginTemplate")
+    archiveVersion.set("")
+
+    manifest {
+        attributes(
+                "Plugin-Main": "com.kyfstore.mcvrplugintemplate.PluginTemplateInitializer"
+        )
+    }
+}
