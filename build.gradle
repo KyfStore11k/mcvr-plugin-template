@@ -8,11 +8,21 @@ version = project.version
 
 repositories {
     mavenCentral()
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
-    implementation "org.slf4j:slf4j-simple:${project.slf4j_version}"
-    compileOnly files("libs/mcversionrenamer-${project.mcvr_version}.jar")
+    compileOnly "maven.modrinth:mcversionrenamer:1.0.3-BETA"
 }
 
 jar {

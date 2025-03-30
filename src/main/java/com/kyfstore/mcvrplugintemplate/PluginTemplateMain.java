@@ -1,8 +1,8 @@
 package com.kyfstore.mcvrplugintemplate;
 
-import com.kyfstore.mcversionrenamer.libapi.core.plugin.api.PluginMain;
-import com.kyfstore.mcversionrenamer.libapi.core.plugin.api.logger.LoggerAPI;
-import org.slf4j.Logger;
+import com.kyfstore.mcversionrenamer.async.logger.AsyncLogger;
+import com.kyfstore.mcversionrenamer.plugin.api.PluginMain;
+import com.kyfstore.mcversionrenamer.plugin.api.logger.LoggerAPI;
 
 public class PluginTemplateMain extends PluginMain {
 
@@ -11,7 +11,7 @@ public class PluginTemplateMain extends PluginMain {
         LoggerAPI loggerAPI = new LoggerAPI();
         loggerAPI.onEnable();
 
-        Logger logger = loggerAPI.getLogger();
+        AsyncLogger logger = loggerAPI.getLogger();
 
         logger.info("This is a message from the Plugin Template!");
     }
