@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'com.gradleup.shadow' version '9.0.0-beta10'
+    id 'de.undercouch.download' version '5.6.0'
 }
 
 group = project.group
@@ -8,21 +9,30 @@ version = project.version
 
 repositories {
     mavenCentral()
-    exclusiveContent {
-        forRepository {
-            maven {
-                name = "Modrinth"
-                url = "https://api.modrinth.com/maven"
-            }
-        }
-        filter {
-            includeGroup "maven.modrinth"
-        }
+    flatDir {
+        dirs layout.buildDirectory.dir('libs').get().asFile
     }
 }
 
+def zipName = "v${project.mcvr_mc_version}.zip"
+def downloadedZipFile = layout.projectDirectory.dir('libs/').file(zipName).asFile
+
+tasks.register('downloadGithubJar', de.undercouch.gradle.tasks.download.Download) {
+    src "https://nightly.link/KyfStore11k/MCVersionRenamer/workflows/build/master/v${project.mcvr_mc_version}.zip"
+    dest downloadedZipFile
+    overwrite true
+}
+
+task extractJar(type: Copy, dependsOn: downloadGithubJar) {
+    from zipTree(downloadedZipFile)
+    into layout.buildDirectory.dir('libs')
+    include '**/*.jar'
+}
+
+tasks.compileJava.dependsOn extractJar
+
 dependencies {
-    compileOnly "maven.modrinth:mcversionrenamer:1.0.3-BETA"
+    compileOnly name: "mcversionrenamer-${project.mcvr_mc_version}-${project.mcvr_version}"
 }
 
 jar {
@@ -31,7 +41,9 @@ jar {
 
     manifest {
         attributes(
-                "Plugin-Main": "com.kyfstore.mcvrplugintemplate.PluginTemplateInitializer"
+                "Plugin-Id":  "mcvr-plugin-template",
+                "Plugin-Main": "com.kyfstore.mcvrplugintemplate.PluginTemplateInitializer",
+                "Plugin-Depends": ""
         )
     }
 }
@@ -42,7 +54,9 @@ shadowJar {
 
     manifest {
         attributes(
-                "Plugin-Main": "com.kyfstore.mcvrplugintemplate.PluginTemplateInitializer"
+                "Plugin-Id":  "mcvr-plugin-template",
+                "Plugin-Main": "com.kyfstore.mcvrplugintemplate.PluginTemplateInitializer",
+                "Plugin-Depends": ""
         )
     }
 }

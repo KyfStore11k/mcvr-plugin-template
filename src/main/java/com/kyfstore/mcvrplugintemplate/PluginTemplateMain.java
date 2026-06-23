@@ -10,9 +10,8 @@ public class PluginTemplateMain extends PluginMain {
     public void onMainCall() {
         LoggerAPI loggerAPI = new LoggerAPI();
         loggerAPI.onEnable();
-
         AsyncLogger logger = loggerAPI.getLogger();
 
-        logger.info("This is a message from the Plugin Template!");
+        logger.info("This is a message sent from MCVRPluginTemplate!");
     }
 }
