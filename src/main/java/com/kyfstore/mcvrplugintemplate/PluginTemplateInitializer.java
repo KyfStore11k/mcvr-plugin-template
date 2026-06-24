@@ -10,6 +10,6 @@ public class PluginTemplateInitializer extends PluginInitializer {
     @Override
     public void onInitialize() {
         File pluginPath = new File(PublicPluginRegistry.getPluginDirectory() + "MCVRPluginTemplate-all.jar");
-        setPluginMain(new PluginObject("PluginTemplate", new PluginTemplateMain(), pluginPath.getAbsolutePath(), true));
+        setPluginMain(new PluginObject("PluginTemplate", new PluginTemplateMain(this.getApi()), pluginPath.getAbsolutePath(), true));
     }
 }

@@ -1,21 +1,34 @@
+buildscript {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+    }
+    dependencies {
+        classpath "net.fabricmc:fabric-loom:${project.loom_version}"
+    }
+}
+
 plugins {
     id 'java'
-    id 'com.gradleup.shadow' version '9.0.0-beta10'
+    id 'com.gradleup.shadow' version '9.4.2'
     id 'de.undercouch.download' version '5.6.0'
+    id 'org.jetbrains.kotlin.jvm' version '2.4.20-Beta1'
 }
+
+apply plugin: "net.fabricmc.fabric-loom${project.loom_type}"
 
 group = project.group
 version = project.version
 
 repositories {
     mavenCentral()
-    flatDir {
-        dirs layout.buildDirectory.dir('libs').get().asFile
-    }
 }
 
 def zipName = "v${project.mcvr_mc_version}.zip"
 def downloadedZipFile = layout.projectDirectory.dir('libs/').file(zipName).asFile
+def outputJarDir = layout.buildDirectory.dir('extracted-libs')
 
 tasks.register('downloadGithubJar', de.undercouch.gradle.tasks.download.Download) {
     src "https://nightly.link/KyfStore11k/MCVersionRenamer/workflows/build/master/v${project.mcvr_mc_version}.zip"
@@ -23,16 +36,43 @@ tasks.register('downloadGithubJar', de.undercouch.gradle.tasks.download.Download
     overwrite true
 }
 
-task extractJar(type: Copy, dependsOn: downloadGithubJar) {
+tasks.register('extractJar', Copy) {
+    dependsOn downloadGithubJar
     from zipTree(downloadedZipFile)
-    into layout.buildDirectory.dir('libs')
+    into outputJarDir
     include '**/*.jar'
 }
 
 tasks.compileJava.dependsOn extractJar
+tasks.shadowJar.dependsOn jar
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 25
+}
+
+afterEvaluate {
+    tasks.genSourcesWithCfr.mustRunAfter shadowJar
+}
+
+configurations {
+    shadowOnly
+    compileOnly.extendsFrom(shadowOnly)
+}
 
 dependencies {
-    compileOnly name: "mcversionrenamer-${project.mcvr_mc_version}-${project.mcvr_version}"
+    minecraft "com.mojang:minecraft:${project.mcvr_mc_version}"
+    //mappings loom.layered() {
+    //    officialMojangMappings()
+    //}
+
+    implementation fileTree(dir: outputJarDir).builtBy(extractJar)
+
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.4.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {
@@ -51,6 +91,8 @@ jar {
 shadowJar {
     archiveBaseName.set("MCVRPluginTemplate")
     archiveVersion.set("")
+
+    configurations = [project.configurations.shadowOnly]
 
     manifest {
         attributes(
